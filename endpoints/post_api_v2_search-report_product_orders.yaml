@@ -1,0 +1,300 @@
+openapi: 3.0.1
+info:
+  title: Аналитика и данные
+  version: analytics
+  description: "<div class=\"description_important\">  \n  Узнать больше об аналитике\
+    \ и данных можно в <a href=\"https://seller.wildberries.ru/instructions/subcategory/be1a4034-53f9-47d6-8f12-9a2923280026\"\
+    >справочном центре</a>\n</div>\n\nВ данном разделе доступны методы получения:\n\
+    \  1. [Статистики по продвижению](/openapi/analytics#tag/Statistika-po-prodvizheniyu)\n\
+    \  2. [Воронки продаж](/openapi/analytics#tag/Voronka-prodazh)\n  3. [Поисковых\
+    \ запросов](/openapi/analytics#tag/Poiskovye-zaprosy)\n  4. [Истории остатков](/openapi/analytics#tag/Istoriya-ostatkov)\n\
+    \  5. [Аналитики продавца в формате CSV](/openapi/analytics#tag/Analitika-prodavca-CSV)\n"
+  x-file-name: analytics
+paths:
+  /api/v2/search-report/product/orders:
+    post:
+      tags:
+      - Поисковые запросы
+      summary: Заказы и позиции по поисковым запросам товара
+      description: "Метод формирует данные для таблицы по количеству заказов и позиций\
+        \ в поиске по запросам покупателя. Данные указаны в рамках периода для [запрошенного\
+        \ товара](/openapi/analytics#tag/Poiskovye-zaprosy/paths/~1api~1v2~1search-report~1product~1search-texts/post).\n\
+        \n<div class=\"description_limit\">  \n  Максимум 3 запроса в <a href=\"/openapi/api-information#tag/Vvedenie/Limity-zaprosov\"\
+        >минуту</a> на один аккаунт продавца\n</div>\n"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductOrdersRequest'
+      responses:
+        '200':
+          description: Успешно
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/CommonResponseProperties'
+                - type: object
+                  required:
+                  - data
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/ProductOrdersResponse'
+        '400':
+          description: Неправильный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorObject400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          description: Доступ запрещён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorObject403'
+        '429':
+          $ref: '#/components/responses/429'
+components:
+  schemas:
+    ProductOrdersTextItem:
+      type: object
+      properties:
+        text:
+          description: Текст поискового запроса
+          type: string
+        frequency:
+          description: Количество обращений с поисковым запросом
+          type: integer
+          format: uint64
+        dateItems:
+          description: Статистика по датам
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductOrdersMetrics'
+      required:
+      - text
+      - frequency
+      - dateItems
+    ErrorObject400:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Заголовок ошибки
+          example: Invalid request body
+        detail:
+          type: string
+          description: Детали ошибки
+          example: 'code=400, message=invalid: positionCluster (field required), limit
+            (field required), offset (field required), internal=invalid: positionCluster
+            (field required), limit (field required), offset (field required'
+        requestId:
+          type: string
+          description: Уникальный ID запроса
+          example: fb25c9e9-cae8-52db-b68e-736c1466a3f5
+        origin:
+          type: string
+          description: ID внутреннего сервиса WB
+          example: analytic-open-api
+      required:
+      - title
+      - detail
+      - requestId
+      - origin
+    ProductOrdersRequest:
+      type: object
+      properties:
+        period:
+          $ref: '#/components/schemas/PeriodOrdersRequest'
+        nmId:
+          example: 211131895
+          description: Артикул WB
+          type: integer
+          format: uint64
+        searchTexts:
+          example:
+          - костюм
+          - пиджак
+          description: Поисковые запросы
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 30
+      required:
+      - period
+      - nmId
+      - searchTexts
+    CommonResponseProperties:
+      type: object
+      description: Результат запроса
+      properties:
+        data:
+          type: object
+    PeriodOrdersRequest:
+      type: object
+      description: Текущий период. Максимум 7 суток
+      required:
+      - start
+      - end
+      properties:
+        start:
+          type: string
+          description: Дата начала периода. Не позднее `end`. Не ранее 365 суток от
+            сегодня
+          format: date
+          example: '2024-02-10'
+        end:
+          type: string
+          description: Дата окончания периода. Не ранее 365 суток от сегодня
+          format: date
+          example: '2024-02-10'
+    ProductOrdersResponse:
+      type: object
+      properties:
+        total:
+          description: Итог по товарам
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductOrdersMetrics'
+        items:
+          description: Элементы таблицы
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductOrdersTextItem'
+      required:
+      - total
+      - items
+    ProductOrdersMetrics:
+      type: object
+      properties:
+        dt:
+          type: string
+          description: Дата сбора статистики
+          format: date
+          example: '2024-02-10'
+        avgPosition:
+          example: 10
+          description: Средняя позиция товара в результатах поиска
+          type: integer
+          format: uint64
+        orders:
+          example: 20
+          description: Сколько раз товары из поиска заказали
+          type: integer
+          format: uint64
+      required:
+      - dt
+      - avgPosition
+      - orders
+    ErrorObject403:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Заголовок ошибки
+          example: Authorization error
+        detail:
+          type: string
+          description: Детали ошибки
+          example: Authorization error
+        requestId:
+          type: string
+          description: Уникальный ID запроса
+          example: fb25c9e9-cae8-52db-b68e-736c1466a3f5
+        origin:
+          type: string
+          description: ID внутреннего сервиса WB
+          example: analytic-open-api
+      required:
+      - title
+      - detail
+      - requestId
+      - origin
+  responses:
+    '401':
+      description: Пользователь не авторизован
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+                description: Заголовок ошибки
+              detail:
+                type: string
+                description: Детали ошибки
+              code:
+                type: string
+                description: Внутренний код ошибки
+              requestId:
+                type: string
+                description: Уникальный ID запроса
+              origin:
+                type: string
+                description: ID внутреннего сервиса WB
+              status:
+                type: number
+                description: HTTP статус-код
+              statusText:
+                type: string
+                description: Расшифровка HTTP статус-кода
+              timestamp:
+                type: string
+                format: RFC3339
+                description: Дата и время запроса
+          example:
+            title: unauthorized
+            detail: 'token problem; token is malformed: could not base64 decode signature:
+              illegal base64 data at input byte 84'
+            code: 07e4668e--a53a3d31f8b0-[UK-oWaVDUqNrKG]; 03bce=277; 84bd353bf-75
+            requestId: 7b80742415072fe8b6b7f7761f1d1211
+            origin: s2s-api-auth-catalog
+            status: 401
+            statusText: Unauthorized
+            timestamp: '2024-09-30T06:52:38Z'
+    '429':
+      description: Слишком много запросов
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+                description: Заголовок ошибки
+              detail:
+                type: string
+                description: Детали ошибки
+              code:
+                type: string
+                description: Внутренний код ошибки
+              requestId:
+                type: string
+                description: Уникальный ID запроса
+              origin:
+                type: string
+                description: ID внутреннего сервиса WB
+              status:
+                type: number
+                description: HTTP статус-код
+              statusText:
+                type: string
+                description: Расшифровка HTTP статус-кода
+              timestamp:
+                type: string
+                format: RFC3339
+                description: Дата и время запроса
+          example:
+            title: too many requests
+            detail: limited by c122a060-a7fb-4bb4-abb0-32fd4e18d489
+            code: 07e4668e-ac2242c5c8c5-[UK-4dx7JUdskGZ]
+            requestId: 9d3c02cc698f8b041c661a7c28bed293
+            origin: s2s-api-auth-catalog
+            status: 429
+            statusText: Too Many Requests
+            timestamp: '2024-09-30T06:52:38Z'
