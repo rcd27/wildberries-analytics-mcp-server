@@ -3,6 +3,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import dotenv from 'dotenv';
+import { getProductOrders, ProductOrdersRequestSchema } from './tools/api/getProductOrders.js';
 import { getProductSearchTexts, ProductSearchTextsRequestSchema } from './tools/api/getProductSearchTexts.js';
 
 dotenv.config();
@@ -61,6 +62,31 @@ server.registerTool(
   async (args, _): Promise<MCPResponse> => {
     return withApiKey(async (apiKey: string): Promise<MCPResponse> => {
       const res = await getProductSearchTexts(args, apiKey);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(res, null, 2)
+          }
+        ],
+        isError: false
+      };
+    });
+  }
+);
+
+server.registerTool(
+  'getProductOrders',
+  {
+    description:
+      'Метод формирует данные для таблицы по количеству заказов и позиций в поиске по запросам покупателя. ' +
+      'Данные указаны в рамках периода для запрошенного товара. ' +
+      'Максимум 3 запроса в минуту на один аккаунт продавца.',
+    inputSchema: ProductOrdersRequestSchema.shape
+  },
+  async (args, _): Promise<MCPResponse> => {
+    return withApiKey(async (apiKey: string): Promise<MCPResponse> => {
+      const res = await getProductOrders(args, apiKey);
       return {
         content: [
           {
