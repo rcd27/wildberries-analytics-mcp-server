@@ -48,7 +48,7 @@ export const OrderBySchema = z.object({
 // Request body
 export const ProductSearchTextsRequestSchema = z.object({
   currentPeriod: PeriodSchema.describe('Текущий период'),
-  pastPeriod: PastPeriodSchema.optional().nullable().describe('Прошлый период для сравнения. Количество дней — меньше или равно `currentPeriod`'),
+  pastPeriod: PastPeriodSchema.nullable().describe('Прошлый период для сравнения. Количество дней — меньше или равно `currentPeriod`'),
   nmIds: z
     .array(z.number().int())
     .max(50)
@@ -74,48 +74,48 @@ export const ProductSearchTextsRequestSchema = z.object({
 
 // Метрика с динамикой
 const MetricWithDynamicsSchema = z.object({
-  current: z.number().int().optional().nullable().describe('Текущее значение'),
-  dynamics: z.number().int().optional().nullable().describe('Динамика по сравнению с предыдущим периодом, %')
+  current: z.number().int().nullable().describe('Текущее значение'),
+  dynamics: z.number().int().nullable().describe('Динамика по сравнению с предыдущим периодом, %')
 });
 
 // Метрика с динамикой и процентилем
 const MetricWithDynamicsAndPercentileSchema = z.object({
-  current: z.number().int().optional().nullable().describe('Текущее значение'),
-  dynamics: z.number().int().optional().nullable().describe('Динамика по сравнению с предыдущим периодом, %'),
-  percentile: z.number().int().optional().nullable().describe('Процент, на который показатель выше, чем у карточек конкурентов по поисковому запросу')
+  current: z.number().int().nullable().describe('Текущее значение'),
+  dynamics: z.number().int().nullable().describe('Динамика по сравнению с предыдущим периодом, %'),
+  percentile: z.number().int().nullable().describe('Процент, на который показатель выше, чем у карточек конкурентов по поисковому запросу')
 });
 
 // Цена
 const PriceSchema = z.object({
-  minPrice: z.number().int().optional().nullable().describe('Минимальная цена продавца со скидкой продавца (без учёта скидки WB Клуба)'),
-  maxPrice: z.number().int().optional().nullable().describe('Максимальная цена продавца со скидкой продавца (без учёта скидки WB Клуба)')
+  minPrice: z.number().int().nullable().describe('Минимальная цена продавца со скидкой продавца (без учёта скидки WB Клуба)'),
+  maxPrice: z.number().int().nullable().describe('Максимальная цена продавца со скидкой продавца (без учёта скидки WB Клуба)')
 });
 
 // Элемент поискового запроса
 export const TableSearchTextItemSchema = z.object({
-  text: z.string().optional().nullable().describe('Текст поискового запроса'),
-  nmId: z.number().int().optional().nullable().describe('Артикул WB'),
-  subjectName: z.string().optional().nullable().describe('Название предмета'),
-  brandName: z.string().optional().nullable().describe('Бренд'),
-  vendorCode: z.string().optional().nullable().describe('Артикул продавца'),
-  name: z.string().optional().nullable().describe('Название товара'),
-  isCardRated: z.boolean().optional().nullable().describe('Есть ли рейтинг у карточки товара'),
-  rating: z.number().optional().nullable().describe('Рейтинг карточки товара'),
-  feedbackRating: z.number().optional().nullable().describe('Рейтинг по отзывам'),
-  price: PriceSchema.optional().nullable().describe('Цена'),
+  text: z.string().nullable().describe('Текст поискового запроса'),
+  nmId: z.number().int().nullable().describe('Артикул WB'),
+  subjectName: z.string().nullable().describe('Название предмета'),
+  brandName: z.string().nullable().describe('Бренд'),
+  vendorCode: z.string().nullable().describe('Артикул продавца'),
+  name: z.string().nullable().describe('Название товара'),
+  isCardRated: z.boolean().nullable().describe('Есть ли рейтинг у карточки товара'),
+  rating: z.number().nullable().describe('Рейтинг карточки товара'),
+  feedbackRating: z.number().nullable().describe('Рейтинг по отзывам'),
+  price: PriceSchema.nullable().describe('Цена'),
   frequency: z.object({
-    current: z.number().int().optional().nullable().describe('Текущее количество'),
-    dynamics: z.number().int().optional().nullable().describe('Динамика по сравнению с предыдущим периодом, %')
-  }).optional().nullable().describe('Количество обращений с поисковым запросом'),
-  weekFrequency: z.number().int().optional().nullable().describe('Количество обращений с поисковым запросом за неделю'),
-  medianPosition: MetricWithDynamicsSchema.optional().nullable().describe('Медианная позиция. Учитываются только те позиции, из которых пользователи добавляли товар в корзину или переходили в его карточку. Серединное значение позиции в поисковой выдаче, которое исключает сильные отклонения данных от среднего значения'),
-  avgPosition: MetricWithDynamicsSchema.optional().nullable().describe('Средняя позиция товара в результатах поиска'),
-  openCard: MetricWithDynamicsAndPercentileSchema.optional().nullable().describe('Количество переходов в карточку товара из поиска'),
-  addToCart: MetricWithDynamicsAndPercentileSchema.optional().nullable().describe('Сколько раз товар из поиска добавили в корзину'),
-  openToCart: MetricWithDynamicsAndPercentileSchema.optional().nullable().describe('Конверсия в корзину из поиска — доля добавлений товара в корзину по отношению ко всем переходам в карточку товара из поиска'),
-  orders: MetricWithDynamicsAndPercentileSchema.optional().nullable().describe('Сколько раз товары из поиска заказали'),
-  cartToOrder: MetricWithDynamicsAndPercentileSchema.optional().nullable().describe('Конверсия в заказ из поиска — доля заказов товара по отношению ко всем добавлениям товара из поиска в корзину'),
-  visibility: MetricWithDynamicsSchema.optional().nullable().describe('Процент видимости товара в результатах поиска')
+    current: z.number().int().nullable().describe('Текущее количество'),
+    dynamics: z.number().int().nullable().describe('Динамика по сравнению с предыдущим периодом, %')
+  }).nullable().describe('Количество обращений с поисковым запросом'),
+  weekFrequency: z.number().int().nullable().describe('Количество обращений с поисковым запросом за неделю'),
+  medianPosition: MetricWithDynamicsSchema.nullable().describe('Медианная позиция. Учитываются только те позиции, из которых пользователи добавляли товар в корзину или переходили в его карточку. Серединное значение позиции в поисковой выдаче, которое исключает сильные отклонения данных от среднего значения'),
+  avgPosition: MetricWithDynamicsSchema.nullable().describe('Средняя позиция товара в результатах поиска'),
+  openCard: MetricWithDynamicsAndPercentileSchema.nullable().describe('Количество переходов в карточку товара из поиска'),
+  addToCart: MetricWithDynamicsAndPercentileSchema.nullable().describe('Сколько раз товар из поиска добавили в корзину'),
+  openToCart: MetricWithDynamicsAndPercentileSchema.nullable().describe('Конверсия в корзину из поиска — доля добавлений товара в корзину по отношению ко всем переходам в карточку товара из поиска'),
+  orders: MetricWithDynamicsAndPercentileSchema.nullable().describe('Сколько раз товары из поиска заказали'),
+  cartToOrder: MetricWithDynamicsAndPercentileSchema.nullable().describe('Конверсия в заказ из поиска — доля заказов товара по отношению ко всем добавлениям товара из поиска в корзину'),
+  visibility: MetricWithDynamicsSchema.nullable().describe('Процент видимости товара в результатах поиска')
 }).passthrough();
 
 // Response

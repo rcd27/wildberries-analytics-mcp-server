@@ -50,6 +50,7 @@ const server = new McpServer(
   }
 );
 
+// FIXME: на стороне потребителе всплыл какой-то anyOf без typeParameter
 server.registerTool(
   'getProductSearchTexts',
   {
